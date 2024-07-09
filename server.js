@@ -5,18 +5,20 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt=require("jsonwebtoken");
+const cors = require('cors');
+const app = express();
+
+
+const serverAddress = '192.168.1.13';
+
 
 const corsOptions = {
-    origin: 'http://192.168.1.13:8081',
-    optionsSuccessStatus:200
-}
-
-const cors = require('cors');
-
-const app = express();
+    origin: `http://${serverAddress}:8081`, // Replace with your IP and Expo port
+    optionsSuccessStatus: 200,
+  };
+  app.use(cors(corsOptions));
 app.use(express.json());
 const dbPath = path.join(__dirname, './data/my-database.db'); 
-app.use(cors(corsOptions));
 const PORT = process.env.PORT || 5000;
 let db = null;
 
@@ -28,7 +30,7 @@ const initializeDBAndServer = async () => {
         });
         console.log('Connected to the SQLite database.');
         app.listen(PORT, () => {
-            console.log(`Server is running at http://localhost:${PORT}/`);
+            console.log(`Server is running at http://${serverAddress}:${PORT}/`);
         });
     } catch (error) {
         console.error('Error:', error.message);
@@ -41,7 +43,11 @@ initializeDBAndServer();
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-    console.log(`it's working for get` )
+    res.json({
+        message: 'Welcome to the API',
+        server:serverAddress,
+        port:PORT,
+    })
 });
 
 app.post('/register', async (req, res) => {
