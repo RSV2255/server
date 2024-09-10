@@ -40,7 +40,6 @@ const initializeDBAndServer = async () => {
             driver: sqlite3.Database,
         });
         console.log('Connected to the SQLite database.');
-        
         server.listen(PORT, () => {
             console.log(`Server is running at http://${serverAddress}:${PORT}/`);
         });
