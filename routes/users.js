@@ -48,11 +48,14 @@ module.exports = (db) => {
             const userName = user.fullName;
             const userId = user.id;
             const userRole = user.userRole;
+            const userLogo = user.userLogo;
+            console.log(userLogo);
            res.json({
             Status: "User exists",
             userName: userName,
             userId: userId,
             userRole: userRole,
+            userLogo: userLogo,
            })
         }
     })
