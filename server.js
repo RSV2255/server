@@ -9,6 +9,7 @@ const userSockets = require('./sockets/users');
 const chatRoutes = require('./routes/chat');
 const postRoutes = require('./routes/post');
 const designerSockets = require('./sockets/designer');
+const designerRoutes = require('./routes/designer');
 const { instrument } = require('@socket.io/admin-ui');
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -46,6 +47,7 @@ async function startServer() {
         app.use('/users', userRoutes(db));
         app.use('/chat', chatRoutes(db));
         app.use('/post', postRoutes(db));
+        app.use('/designer', designerRoutes(db));
         userSockets(io, db); // Make sure this line is present and correct
         designerSockets(io, db);
         server.listen(PORT, serverAddress, () => {
