@@ -396,4 +396,39 @@ module.exports = (io, db) => {
             socket.emit('pdfFile', { fileName, fileData: base64Data });
             });
         });
+    socket.on('sendPost', async (text, userId, userName, userRole, otherUserId, otherUserName, otherUserRole, postLink) => {
+        try {
+            await db.run('BEGIN TRANSACTION');
+
+            const insertQuery = `
+                INSERT INTO chat (userId, userName, userRole, text, createAt, otherUserId, otherUserName, systemMessage, otherUserRole, postLink)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            await db.run(insertQuery, [userId, userName, userRole, text, Math.floor(Date.now()), otherUserId, otherUserName, 'false', otherUserRole, postLink]);
+            await db.run('COMMIT');
+
+            const selectQuery = `
+                SELECT * FROM chat WHERE (userId = ? AND otherUserId = ?) OR (otherUserId = ? AND userId = ?) ORDER BY createAt DESC LIMIT 1
+            `;
+            const message = await db.get(selectQuery, [otherUserId, userId, otherUserId, userId]);
+            if (!message) {
+                console.log('Error: Message not found');
+            } else {
+                console.log('Message added successfully');
+                // Find recipient's socket ID and emit the message
+                const recipientSocket = await findSocketIdByUserId(otherUserId);
+                if (recipientSocket) {
+                    io.to(recipientSocket).emit('received-message', message);
+                } else {
+                    console.log(`Socket ID not found for user ${otherUserId}`);
+                }
+
+                // Emit the message back to the sender
+                io.to(socket.id).emit('received-message', message);
+            }
+        } catch (error) {
+            console.error('Error adding messages:', error);
+            await db.run('ROLLBACK'); // Rollback transaction on error
+        }
+    });
 }

@@ -5,20 +5,20 @@ module.exports = (db) => {
     // Fetch all designers
     router.get('/fetchAllDesigners', async (req, res) => {
         const fetchDesignersQuery = `
-SELECT 
-    ROW_NUMBER() OVER (ORDER BY id) AS unique_id,
-    id,
-    fullName,
-    email,
-    mobileNumber,
-    userRole,
-    userLogo
-FROM (
-    SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM designerDetails 
-    UNION ALL
-    SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM userDetails
-)
-        `;
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY id) AS row_id,
+            id,
+            fullName,
+            email,
+            mobileNumber,
+            userRole,
+            userLogo
+        FROM (
+            SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM designerDetails 
+            UNION ALL
+            SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM userDetails
+            )
+        `;  
         try {
             const designers = await db.all(fetchDesignersQuery);
             if (designers.length > 0) {
