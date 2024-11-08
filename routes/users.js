@@ -59,7 +59,24 @@ module.exports = (db) => {
            })
         }
     })
-
+    router.get('/userDetails/:userId', async (req,res) => {
+        const userId = req.params.userId;
+        try {
+            const userDetailsQuery = `
+        SELECT * FROM userDetails WHERE id = ? AND userRole = 1;
+        `
+            const userDetails = await db.get(userDetailsQuery, [userId]);
+            if (userDetails) {
+                console.log(userDetails);
+                res.json(userDetails);
+            } else {
+                console.log('No User Records found');
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ status: false, message: "Internal server error" });
+        }
+    })
     router.get('/fetchComments/:postId', async (req,res) => {
         const postId = req.params.postId;
         const getComments = `
