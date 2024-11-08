@@ -77,6 +77,20 @@ module.exports = (db) => {
             res.status(500).json({ status: false, message: "Internal server error" });
         }
     })
+    router.put('/updateUserDetails/:userId', async (req,res) => {
+        const userId = req.params.userId;
+        try {
+            const { fullName, email, mobileNumber, gender, userLogo } = req.body;
+            const updateUserDetails = `
+            UPDATE userDetails SET fullName = ?, email = ?, mobileNumber = ?, gender = ?, userLogo = ? WHERE id = ?;
+            `;
+            await db.run(updateUserDetails, [fullName, email, mobileNumber, gender, userLogo, userId]);
+            res.status(200).json({ status: true, message: 'User details updated successfully' });
+        } catch (error) {
+            console.error('Error updating user details:', error);
+            res.status(500).json({ status: false, message: 'Internal server error' });
+        }
+    })
     router.get('/fetchComments/:postId', async (req,res) => {
         const postId = req.params.postId;
         const getComments = `
