@@ -1,6 +1,15 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 
+// Ensure the uploads directory exists
+const ensureImageDirectoryExists = () => {
+    const dir = path.join(__dirname, '..', 'images');
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+};
 
 module.exports = (db) => {
     router.post('/register', async (req, res) => {
@@ -91,6 +100,23 @@ module.exports = (db) => {
             res.status(500).json({ status: false, message: 'Internal server error' });
         }
     })
+    router.post('/upload-image', (req, res) => {
+        console.log(req.body);
+        ensureImageDirectoryExists();
+        const { image, fileName, extension } = req.body;
+    
+        const buffer = Buffer.from(image, 'base64');
+        const filePath = path.join(__dirname, '..', 'images', `${fileName}.${extension}`);
+    
+        fs.writeFile(filePath, buffer, (err) => {
+            if (err) {
+                console.error('Error saving image file: ', err);
+                return res.status(500).send({ error: 'Error saving image file' });
+            }
+            console.log('Image saved successfully');
+            res.json({ imageUrl: `images/${fileName}.${extension}` });
+        });
+    });
     router.get('/fetchComments/:postId', async (req,res) => {
         const postId = req.params.postId;
         const getComments = `
