@@ -4,14 +4,15 @@ const path = require('path');
 const router = express.Router();
 
 module.exports = (db) => {
-       router.get('/fetchServices/:projectId', async (req, res) => {
+        router.get('/fetchServices/:projectId', async (req, res) => {
         const projectId = req.params.projectId;
         const query = `
-        SELECT s.serviceName, COUNT(ps.serviceId)* 25 AS percentage 
+        SELECT s.serviceName, ps.createdAt, COUNT(ps.serviceId) * 25 AS percentage 
         FROM vendorServices s LEFT JOIN projectServices ps 
         WHERE s.servicesId = ps.serviceId AND ps.projectId = ? 
         GROUP BY ps.serviceId 
-        ORDER BY ps.serviceId DESC`
+        ORDER BY ps.serviceId DESC
+        `
         try {
             const services = await db.all(query, [projectId]);
             if (services.length > 0) {
@@ -23,6 +24,6 @@ module.exports = (db) => {
             console.error('Error fetching services:', error);
             res.status(500).json({ success: false, message: 'Internal server error' });
         }
-       });
-       return router;
+        });
+        return router;
 }
