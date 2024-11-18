@@ -11,7 +11,7 @@ module.exports = (db) => {
         FROM vendorServices s LEFT JOIN projectServices ps 
         WHERE s.servicesId = ps.serviceId AND ps.projectId = ? 
         GROUP BY ps.serviceId 
-        ORDER BY ps.serviceId DESC
+        ORDER BY ps.serviceId 
         `
         try {
             const services = await db.all(query, [projectId]);
