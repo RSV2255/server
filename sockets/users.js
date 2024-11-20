@@ -35,22 +35,22 @@ module.exports = (io, db) => {
                 }
             })
             // fetching the user details from the database
-        socket.on('fetchUserDetails', async(userId, response) => {
-                try {
-                    const userDetailsQuery = `
-                SELECT * FROM userDetails WHERE id = ? AND userRole = 1;
-                `
-                    const userDetails = await db.get(userDetailsQuery, [userId]);
-                    if (userDetails) {
-                        console.log(userDetails);
-                        response({ userDetails })
-                    } else {
-                        console.log('No User Records found');
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-            })
+        // socket.on('fetchUserDetails', async(userId, response) => {
+        //         try {
+        //             const userDetailsQuery = `
+        //         SELECT * FROM userDetails WHERE id = ? AND userRole = 1;
+        //         `
+        //             const userDetails = await db.get(userDetailsQuery, [userId]);
+        //             if (userDetails) {
+        //                 console.log(userDetails);
+        //                 response({ userDetails })
+        //             } else {
+        //                 console.log('No User Records found');
+        //             }
+        //         } catch (error) {
+        //             console.error(error);
+        //         }
+        //     })
             // fetching the designer details from the database
 
         // fetching the project details from the database
