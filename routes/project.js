@@ -7,7 +7,7 @@ module.exports = (db) => {
         router.get('/fetchServices/:projectId', async (req, res) => {
         const projectId = req.params.projectId;
         const query = `
-        SELECT ps.serviceId, s.serviceName, ps.createdAt, COUNT(ps.serviceId) * 25 AS percentage 
+        SELECT ps.serviceId, s.serviceName, ps.createdAt, (COUNT(ps.serviceId)-1) * 25 AS percentage 
         FROM vendorServices s LEFT JOIN projectServices ps 
         WHERE s.servicesId = ps.serviceId AND ps.projectId = ? 
         GROUP BY ps.serviceId 
