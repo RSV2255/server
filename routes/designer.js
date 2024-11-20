@@ -3,6 +3,25 @@ const router = express.Router();
 
 module.exports = (db) => {
     // Fetch all designers
+    router.get('/fetchDesignerdetails/:designerId', async (req, res) => {
+        const designerId = req.params.designerId;
+        const fetchDesignerDetailsQuery = `
+            SELECT * FROM designerDetails WHERE id = ? AND userRole = 2;
+        `;
+        try {
+            const designerDetails = await db.get(fetchDesignerDetailsQuery, [designerId]);
+            if (designerDetails) {
+                res.json({ success: true, designerDetails });
+            } else {
+                res.status(404).json({ success: false, message: 'No designer details found' });
+            }
+        }
+        catch (error) {
+            console.error('Error fetching designer details:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    })
+    
     router.get('/fetchAllDesigners', async (req, res) => {
         const fetchDesignersQuery = `
         SELECT 

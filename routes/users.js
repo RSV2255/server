@@ -198,6 +198,7 @@ module.exports = (db) => {
             res.status(500).json({ status: false, error: 'Error registering project', details: error.message });
         }
     });
+    
     router.get('/fetchProject/:projectId', async (req,res) => {
         const projectId = req.params.projectId;
         const fetchProjectList = `SELECT * FROM projects WHERE projectId = ?;`;

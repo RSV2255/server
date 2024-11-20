@@ -51,7 +51,6 @@ module.exports = (io, db) => {
         //             console.error(error);
         //         }
         //     })
-            // fetching the designer details from the database
 
         // fetching the project details from the database
         socket.on('fetchProjectList', async(userId, response) => {
