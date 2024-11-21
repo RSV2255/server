@@ -16,7 +16,7 @@ module.exports = (io, db) => {
                 }
             })
             // fetching the feed details from the database
-        socket.on('fetch-feedDetails', async(callback) => {
+        socket.on('fetch-feedDetails', async( callback ) => {
                 try {
                     const feedDetailsQuery = `
                 SELECT * FROM designerPost ORDER BY createdAt DESC;
