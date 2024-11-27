@@ -28,9 +28,15 @@ module.exports = (db) => {
         router.get('/fetchServiceStatus/:serviceId', async (req, res) => {
             const serviceId = req.params.serviceId;
             const query = `
-            SELECT * FROM projectServices 
-            WHERE serviceId = ?
-            ORDER BY createdAt
+                SELECT *
+                FROM projectServices ps
+                WHERE serviceId = ? AND id NOT IN (
+                    SELECT id
+                    FROM projectServices
+                    WHERE serviceId = ps.serviceId
+                    ORDER BY createdAt
+                    LIMIT 1
+                );
             `
             try {
                 const services = await db.all(query, [serviceId]);
@@ -76,6 +82,37 @@ module.exports = (db) => {
             `
             try {
                 const projects = await db.all(query, [projectId]);
+                res.json({ success: true, projects });
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+                res.status(500).json({ success: false, message: 'Internal server error' });
+            }
+        })
+        router.get('/fetchProjectUpdate/:userId', async (req,res) => {
+            const userId = req.params.userId;
+            const query = `
+            SELECT ps.*
+            FROM projectServices ps
+            JOIN projects p ON ps.projectId = p.projectId
+            WHERE p.userId = ?
+            AND p.status = 'Ongoing'  
+            AND ps.id NOT IN (
+                SELECT id
+                FROM projectServices
+                WHERE projectId IN (
+                    SELECT projectId
+                    FROM projects
+                    WHERE userId = ?
+                        AND status = 'Ongoing'
+                )
+                AND serviceId = ps.serviceId
+                ORDER BY createdAt
+                LIMIT 1
+            )
+            ORDER BY ps.createdAt;
+            `
+            try {
+                const projects = await db.all(query, [userId, userId]);
                 res.json({ success: true, projects });
             } catch (error) {
                 console.error('Error fetching projects:', error);
