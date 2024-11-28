@@ -43,7 +43,7 @@ module.exports = (db) => {
                 if (services.length > 0) {
                     res.json({ success: true, services });
                 } else {
-                    res.status(404).json({ success: false, message: 'No services found' });
+                    res.status(404).json({ success: false, services: [] });
                 }
             } catch (error) {
                 console.error('Error fetching services:', error);
