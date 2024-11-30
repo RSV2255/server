@@ -210,6 +210,17 @@ module.exports = (db) => {
             res.status(500).json({ status: false, error: 'Error fetching project list', details: error.message });
         }
     })
+    router.get('/fetchTransactions/:userId', async (req,res) => {
+        const userId = req.params.userId;
+        const fetchTransactions = `SELECT * FROM payments WHERE user_id = ? ORDER BY createdAt DESC;`;
+        try {
+            const rows = await db.all(fetchTransactions, [userId]);
+            res.json(rows);
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            res.status(500).json({ status: false, error: 'Error fetching transactions', details: error.message });
+        }
+    })
 
 return router;
 };
