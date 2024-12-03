@@ -11,6 +11,7 @@ const projectRoutes = require('./routes/project');
 const designerRoutes = require('./routes/designer');
 const userSockets = require('./sockets/users');
 const designerSockets = require('./sockets/designer');
+const smsotpRoutes = require('./routes/smsotp');
 const { instrument } = require('@socket.io/admin-ui');
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -50,6 +51,7 @@ async function startServer() {
         app.use('/post', postRoutes(db));
         app.use('/project', projectRoutes(db));
         app.use('/designer', designerRoutes(db));
+        app.use('/mobileVerify', smsotpRoutes());
         userSockets(io, db); // Make sure this line is present and correct
         designerSockets(io, db);
         server.listen(PORT, serverAddress, () => {

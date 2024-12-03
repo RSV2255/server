@@ -83,24 +83,7 @@ module.exports = (io, db) => {
     });
    
     // fetching the messages from the database
-    socket.on('fetchMessages', async(userId, otherUserId,) => {
-        try {
-            const selectQuery = `
-            SELECT * FROM chat WHERE ((userId = ? AND otherUserId = ?) OR (otherUserId = ? and userId = ?)) AND userId != otherUserId
-            `
-            const messages = await db.all(selectQuery, [userId, otherUserId, userId, otherUserId]);
-            if (!messages) {
-                console.log('Error: Messages not found');
-            } else {
-                console.log('Messages fetched successfully');
-                console.log(messages)
-                socket.emit('messages', messages);
-            }
-        }
-        catch (error) {
-            console.error('Error fetching messages:', error);
-        }
-    })
+   
     // fetching the likes from the database
     socket.on('fetchLikes', async (callback) => {
         try {

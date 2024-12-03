@@ -116,7 +116,7 @@ module.exports = (io, db) => {
         socket.on('fetchChatlist', async(userId, callback) => {
             try {
                 const chatlistQuery = `
-                    WITH LatestMessages AS (
+                                        WITH LatestMessages AS (
                         SELECT
                             CASE 
                                 WHEN userId = ? THEN otherUserId
@@ -124,10 +124,22 @@ module.exports = (io, db) => {
                             END AS partnerUserId,
                             MAX(createAt) AS latestCreateAt
                         FROM chat
-                        WHERE (userId = ? OR otherUserId = ?) AND userId != otherUserId
+                        WHERE (userId = ? OR otherUserId = ?) AND (userId != otherUserId OR userName != otherUserName)
                         GROUP BY partnerUserId
                     )
-                    SELECT c.*
+                    SELECT c.*,
+					CASE 
+						WHEN c.userRole = 1 
+						THEN (SELECT userLogo FROM userDetails WHERE id = c.userId)
+						WHEN c.userRole = 2
+						THEN (SELECT userLogo FROM designerDetails WHERE id = c.userId)
+					END AS userlogo,
+					CASE 
+						WHEN c.otherUserRole = 1 
+						THEN (SELECT userLogo FROM userDetails WHERE id = c.otherUserId)
+						WHEN c.otherUserRole = 2
+						THEN (SELECT userLogo FROM designerDetails WHERE id = c.otherUserId)
+					END AS otherUserLogo
                     FROM chat c
                     JOIN LatestMessages lm
                         ON ((c.userId = ? AND c.otherUserId = lm.partnerUserId)
@@ -138,7 +150,7 @@ module.exports = (io, db) => {
 
                 const chatlist = await db.all(chatlistQuery, [userId, userId, userId, userId, userId]);
 
-                console.log('Fetched chatlist:', chatlist); // Log the fetched chatlist
+                console.log('Fetched chatlist:', chatlist); 
 
                 if (!chatlist || chatlist.length === 0) {
                     console.log('No chatlist found for userId:', userId);
@@ -157,7 +169,7 @@ module.exports = (io, db) => {
         socket.on('fetchMessages', async(userId, otherUserId, ) => {
                 try {
                     const selectQuery = `
-                SELECT * FROM chat WHERE ((userId = ? AND otherUserId = ?) OR (otherUserId = ? and userId = ?)) AND userId != otherUserId
+                SELECT * FROM chat WHERE ((userId = ? AND otherUserId = ?) OR (otherUserId = ? and userId = ?)) 
                 `
                     const messages = await db.all(selectQuery, [userId, otherUserId, userId, otherUserId]);
                     if (!messages) {

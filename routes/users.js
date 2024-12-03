@@ -212,7 +212,20 @@ module.exports = (db) => {
     })
     router.get('/fetchTransactions/:userId', async (req,res) => {
         const userId = req.params.userId;
-        const fetchTransactions = `SELECT * FROM payments WHERE user_id = ? ORDER BY createdAt DESC;`;
+        const fetchTransactions = `
+                                        SELECT
+                                        p.projectId,
+                                        p.name AS name,
+                                        pay.id AS payment_id,
+                                        pay.amount AS amount,
+                                        pay.createdAt AS createdAt
+                                    FROM 
+                                        projects p
+                                    JOIN 
+                                        payments pay ON p.projectId = pay.project_id
+                                    WHERE   
+                                        p.userId = ?;
+        `;
         try {
             const rows = await db.all(fetchTransactions, [userId]);
             res.json(rows);
@@ -221,6 +234,46 @@ module.exports = (db) => {
             res.status(500).json({ status: false, error: 'Error fetching transactions', details: error.message });
         }
     })
-
+    router.get('/fetchOngoingProjectPayments/:userId', async (req,res) => {
+        const userId = req.params.userId;
+        const fetchOngoingProjectPayments = `
+        WITH CumulativePayments AS (
+    SELECT  
+        p.projectId,
+        p.name AS project_name,
+        p.status,
+        p.budget,
+        p.createdAt AS project_created_at,
+        p.thumbnail,
+        pay.id AS payment_id,
+        pay.amount AS payment_amount,
+        pay.createdAt AS createdAt,
+        SUM(pay.amount) OVER (PARTITION BY p.projectId ORDER BY pay.createdAt) AS cumulative_payment,
+        (SUM(pay.amount) OVER (PARTITION BY p.projectId ORDER BY pay.createdAt) * 100.0 / p.budget) AS cumulative_percentage  
+    FROM 
+        projects p
+    JOIN 
+        payments pay ON p.projectId = pay.project_id
+    WHERE 
+        p.userId = ?
+        AND p.status = 'Ongoing'
+)
+SELECT 
+    payment_id,
+    budget,
+    createdAt,
+    cumulative_payment,
+    cumulative_percentage
+FROM 
+    CumulativePayments
+`;
+        try {
+            const rows = await db.all(fetchOngoingProjectPayments, [userId]);
+            res.json(rows);
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            res.status(500).json({ status: false, error: 'Error fetching transactions', details: error.message });
+        }
+    })
 return router;
 };
