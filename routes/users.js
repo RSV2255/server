@@ -275,5 +275,66 @@ FROM
             res.status(500).json({ status: false, error: 'Error fetching transactions', details: error.message });
         }
     })
+
+    router.get('/catalogs', async (req, res) => {
+        const fetchCatalogs = `
+        SELECT * FROM catalogs;
+        `
+        try {
+            const rows = await db.all(fetchCatalogs);
+            res.json(rows);
+        } catch (error) {
+            console.error('Error fetching catalogs:', error);
+            res.status(500).json({ status: false, error: 'Error fetching catalogs', details});
+        }
+    })
+    router.post('/user-catalog', async (req,res) => {
+        const { catalogIds, userId } = req.body; // Accept an array of catalog IDs
+        const fetchUserCatalog = `
+        INSERT INTO user_catalogs (catalogId, userId)
+        VALUES (?, ?)
+        `;
+        const checkCatalogExists = `
+        SELECT COUNT(*) as count FROM user_catalogs WHERE catalogId = ? AND userId = ?;
+        `;
+        try {
+            for (const catalogId of catalogIds) {
+                // Check if the catalogId already exists for the user
+                const result = await db.get(checkCatalogExists, [catalogId, userId]);
+                if (result.count === 0) { // If it does not exist, insert it
+                    await db.run(fetchUserCatalog, [catalogId, userId]);
+                }
+            }
+            res.json({ status: true, message: 'User catalogs processed successfully' });
+        } catch (error) {
+            console.error('Error processing user catalogs:', error);
+            res.status(500).json({ status: false, error: 'Error processing user catalogs', details: error.message });
+        }
+    })
+    router.delete('/user-catalog', async (req, res) => {
+        const { catalogIds, userId } = req.body; // Accept an array of catalog IDs
+
+        // Validate input
+        if (!Array.isArray(catalogIds) || catalogIds.length === 0 || !userId) {
+            return res.status(400).json({ status: false, message: 'Invalid input: catalogIds must be a non-empty array and userId must be provided.' });
+        }
+
+        const deleteCatalogs = `
+        DELETE FROM user_catalogs 
+        WHERE userId = ? AND catalogId NOT IN (?)
+        `;
+
+        try {
+            // Convert catalogIds array to a comma-separated string for the SQL query
+            const placeholders = catalogIds.map(() => '?').join(', ');
+            const query = deleteCatalogs.replace('(?)', `(${placeholders})`);
+
+            await db.run(query, [userId, ...catalogIds]);
+            res.json({ status: true, message: 'Unmatched user catalogs deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting unmatched user catalogs:', error);
+            res.status(500).json({ status: false, error: 'Error deleting unmatched user catalogs', details: error.message });
+        }
+    });
 return router;
 };
