@@ -223,7 +223,7 @@ module.exports = (db) => {
                                         projects p
                                     JOIN 
                                         payments pay ON p.projectId = pay.project_id
-                                    WHERE   
+                                    WHERE
                                         p.userId = ?;
         `;
         try {
@@ -312,20 +312,15 @@ FROM
         }
     })
     router.delete('/user-catalog', async (req, res) => {
-        const { catalogIds, userId } = req.body; // Accept an array of catalog IDs
-
-        // Validate input
+        const { catalogIds, userId } = req.body; 
         if (!Array.isArray(catalogIds) || catalogIds.length === 0 || !userId) {
             return res.status(400).json({ status: false, message: 'Invalid input: catalogIds must be a non-empty array and userId must be provided.' });
         }
-
         const deleteCatalogs = `
         DELETE FROM user_catalogs 
         WHERE userId = ? AND catalogId NOT IN (?)
         `;
-
         try {
-            // Convert catalogIds array to a comma-separated string for the SQL query
             const placeholders = catalogIds.map(() => '?').join(', ');
             const query = deleteCatalogs.replace('(?)', `(${placeholders})`);
 
@@ -336,5 +331,6 @@ FROM
             res.status(500).json({ status: false, error: 'Error deleting unmatched user catalogs', details: error.message });
         }
     });
-return router;
+
+    return router;
 };

@@ -16,12 +16,19 @@ module.exports = (io, db) => {
                 }
             })
             // fetching the feed details from the database
-        socket.on('fetch-feedDetails', async( callback ) => {
+        socket.on('fetch-feedDetails', async( userId, callback ) => {
                 try {
                     const feedDetailsQuery = `
-                SELECT * FROM designerPost ORDER BY createdAt DESC;
+                SELECT *
+                FROM designerPost
+                ORDER BY 
+                    CASE 
+                        WHEN catalog IN (SELECT catalogId FROM user_catalogs WHERE userId = ?) THEN 0 
+                        ELSE 1 
+                    END,
+                createdAt DESC; 
                 `
-                    const feedDetails = await db.all(feedDetailsQuery);
+                    const feedDetails = await db.all(feedDetailsQuery, [userId]);
                     if (!feedDetails) {
                         console.log('Error: Feed details not found');
                         callback({ success: false, message: 'Feed details not found' });
@@ -31,7 +38,6 @@ module.exports = (io, db) => {
                     }
                 } catch (error) {
                     console.error('Error fetching feed details:', error);
-                    callback({ success: false, message: 'Error fetching Feed details' })
                 }
             })
             // fetching the user details from the database
