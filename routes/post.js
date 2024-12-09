@@ -40,5 +40,19 @@ module.exports = (db) => {
             res.status(500).json({ status: false, message: "Internal server error" });
         }
     })
+
+    router.get('/fetchPostDetails/:postId', async (req,res) => {
+        const postId = req.params.postId;
+        const getPost  =`
+        SELECT * FROM designerPost WHERE postId = ?;
+        `;
+        try {
+            const posts = await db.get(getPost,[postId]);
+            res.status(201).json( posts )
+        } catch(error) {
+            console.error(`Error adding Comment: `, error);
+            res.status(500).json({status: false, message: " Internal Server Error"})
+        }
+    })
     return router;
 }
