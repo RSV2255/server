@@ -26,6 +26,7 @@ module.exports = (db) => {
             res.status(500).json({ message: "Internal server error" });
         }
     })
+
     router.post('/addComment', async (req,res) => {
         const { postId, designerId, comment, userName, userLogo } = req.body;
         const addComment = `
@@ -54,5 +55,6 @@ module.exports = (db) => {
             res.status(500).json({status: false, message: " Internal Server Error"})
         }
     })
+    
     return router;
 }
