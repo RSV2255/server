@@ -21,7 +21,6 @@ module.exports = (db) => {
             res.status(500).json({ success: false, message: 'Internal server error' });
         }
     })
-    
     router.get('/fetchAllDesigners', async (req, res) => {
         const fetchDesignersQuery = `
         SELECT 
