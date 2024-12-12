@@ -68,6 +68,7 @@ module.exports = (db) => {
            })
         }
     })
+
     router.get('/userDetails/:userId', async (req,res) => {
         const userId = req.params.userId;
         try {
@@ -117,6 +118,7 @@ module.exports = (db) => {
             res.json({ imageUrl: `images/${fileName}.${extension}` });
         });
     });
+
     router.get('/fetchComments/:postId', async (req,res) => {
         const postId = req.params.postId;
         const getComments = `
@@ -141,6 +143,7 @@ module.exports = (db) => {
             res.status(500).json({ message: "Internal server error" });
         }
     })
+    
     router.post('/addComment', async (req,res) => {
         const { postId, designerId, comment, userName, userLogo } = req.body;
         const addComment = `
@@ -224,7 +227,8 @@ module.exports = (db) => {
                                     JOIN 
                                         payments pay ON p.projectId = pay.project_id
                                     WHERE
-                                        p.userId = ?;
+                                        p.userId = ?
+                                    ORDER BY pay.createdAt DESC;
         `;
         try {
             const rows = await db.all(fetchTransactions, [userId]);
@@ -257,16 +261,16 @@ module.exports = (db) => {
     WHERE 
         p.userId = ?
         AND p.status = 'Ongoing'
-)
-SELECT 
-    payment_id,
-    budget,
-    createdAt,
-    cumulative_payment,
-    cumulative_percentage
-FROM 
-    CumulativePayments
-`;
+    )
+    SELECT 
+        payment_id,
+        budget,
+        createdAt,
+        cumulative_payment,
+        cumulative_percentage
+    FROM 
+        CumulativePayments
+    `;
         try {
             const rows = await db.all(fetchOngoingProjectPayments, [userId]);
             res.json(rows);
@@ -275,7 +279,6 @@ FROM
             res.status(500).json({ status: false, error: 'Error fetching transactions', details: error.message });
         }
     })
-
     router.get('/catalogs', async (req, res) => {
         const fetchCatalogs = `
         SELECT * FROM catalogs;
@@ -299,9 +302,8 @@ FROM
         `;
         try {
             for (const catalogId of catalogIds) {
-                // Check if the catalogId already exists for the user
                 const result = await db.get(checkCatalogExists, [catalogId, userId]);
-                if (result.count === 0) { // If it does not exist, insert it
+                if (result.count === 0) {
                     await db.run(fetchUserCatalog, [catalogId, userId]);
                 }
             }
@@ -311,19 +313,19 @@ FROM
             res.status(500).json({ status: false, error: 'Error processing user catalogs', details: error.message });
         }
     })
+
     router.delete('/user-catalog', async (req, res) => {
-        const { catalogIds, userId } = req.body; 
+        const { catalogIds, userId } = req.body;
         if (!Array.isArray(catalogIds) || catalogIds.length === 0 || !userId) {
             return res.status(400).json({ status: false, message: 'Invalid input: catalogIds must be a non-empty array and userId must be provided.' });
         }
         const deleteCatalogs = `
-        DELETE FROM user_catalogs 
+        DELETE FROM user_catalogs
         WHERE userId = ? AND catalogId NOT IN (?)
         `;
         try {
             const placeholders = catalogIds.map(() => '?').join(', ');
             const query = deleteCatalogs.replace('(?)', `(${placeholders})`);
-
             await db.run(query, [userId, ...catalogIds]);
             res.json({ status: true, message: 'Unmatched user catalogs deleted successfully' });
         } catch (error) {
@@ -331,6 +333,5 @@ FROM
             res.status(500).json({ status: false, error: 'Error deleting unmatched user catalogs', details: error.message });
         }
     });
-
     return router;
 };
