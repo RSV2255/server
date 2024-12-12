@@ -143,7 +143,7 @@ module.exports = (db) => {
             res.status(500).json({ message: "Internal server error" });
         }
     })
-    
+
     router.post('/addComment', async (req,res) => {
         const { postId, designerId, comment, userName, userLogo } = req.body;
         const addComment = `
@@ -188,9 +188,7 @@ module.exports = (db) => {
                 startDate,
                 endDate
             ]);
-
             console.log('Insert result:', result);
-
             if (result.changes > 0) {
                 res.status(201).json({ status: true, message: 'Project Registered Successfully', projectId: result.lastID });
             } else {
@@ -216,7 +214,7 @@ module.exports = (db) => {
     router.get('/fetchTransactions/:userId', async (req,res) => {
         const userId = req.params.userId;
         const fetchTransactions = `
-                                        SELECT
+                                    SELECT
                                         p.projectId,
                                         p.name AS name,
                                         pay.id AS payment_id,
