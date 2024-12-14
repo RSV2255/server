@@ -15,18 +15,17 @@ module.exports = (io, db) => {
                     console.error('Error updating user:', error);
                 }
             })
-            // fetching the feed details from the database
         socket.on('fetch-feedDetails', async( userId, callback ) => {
                 try {
                     const feedDetailsQuery = `
                 SELECT *
                 FROM designerPost
-                ORDER BY 
-                    CASE 
-                        WHEN catalog IN (SELECT catalogId FROM user_catalogs WHERE userId = ?) THEN 0 
-                        ELSE 1 
+                ORDER BY
+                    CASE
+                        WHEN catalog IN (SELECT catalogId FROM user_catalogs WHERE userId = ?) THEN 0
+                        ELSE 1
                     END,
-                createdAt DESC; 
+                createdAt DESC;
                 `
                     const feedDetails = await db.all(feedDetailsQuery, [userId]);
                     if (!feedDetails) {
@@ -40,24 +39,6 @@ module.exports = (io, db) => {
                     console.error('Error fetching feed details:', error);
                 }
             })
-            // fetching the user details from the database
-        // socket.on('fetchUserDetails', async(userId, response) => {
-        //         try {
-        //             const userDetailsQuery = `
-        //         SELECT * FROM userDetails WHERE id = ? AND userRole = 1;
-        //         `
-        //             const userDetails = await db.get(userDetailsQuery, [userId]);
-        //             if (userDetails) {
-        //                 console.log(userDetails);
-        //                 response({ userDetails })
-        //             } else {
-        //                 console.log('No User Records found');
-        //             }
-        //         } catch (error) {
-        //             console.error(error);
-        //         }
-        //     })
-
         // fetching the project details from the database
         socket.on('fetchProjectList', async(userId, response) => {
                 try {
@@ -75,7 +56,7 @@ module.exports = (io, db) => {
                     console.error(error);
                 }
             })
-            // fetching the liked feed from the database
+
         socket.on('fetchLikedFeed', async(userId, callback) => {
             console.log('Fetching liked feed for userId:', userId);
             try {
@@ -425,7 +406,7 @@ module.exports = (io, db) => {
                 const message = await db.get(selectQuery, [data.otherUserId, data.userId, data.otherUserId, data.userId]);
                 if (!message) {
                     console.log('Error: Message not found');
-                } else {
+                } else { 
                     console.log('Video message added successfully');
                     const recipientSocket = await findSocketIdByUserId(data.otherUserId);
                     if (recipientSocket) {
@@ -532,7 +513,6 @@ module.exports = (io, db) => {
                 callback({ success: false, message: 'An error occurred while fetching follow status', isFollowing: null });
             }
         });
-
         socket.on('disconnect', () => {
             console.log(`Client disconnected with ${socket.id}`);
         });
