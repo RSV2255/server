@@ -331,5 +331,44 @@ module.exports = (db) => {
             res.status(500).json({ status: false, error: 'Error deleting unmatched user catalogs', details: error.message });
         }
     });
+    router.get('/notification/:userId/:userRole', async(req, res) => {
+        const userId = req.params.userId;
+        const userRole = req.params.userRole;
+        const fetchQuery = `
+        SELECT * FROM notifications WHERE isViewed = 'False' AND userId = ? AND userRole = ?;
+        `
+        try {
+            const notifications = await db.all(fetchQuery,[userId,userRole]);
+            if (notifications) {
+                res.json({status: true, notifications})
+            } else {
+                res.json({status: true, message:"No Notifications Left"})
+            }
+        } catch(error) {
+            console.error('Error fetching Notifications Data', error);
+        }
+    })
+    router.put('/notification/:notificationId', async (req, res) => {
+        const notificationId = req.params.notificationId;
+        const updateQuery = `
+            UPDATE notifications 
+            SET isViewed = 'True' 
+            WHERE id = ?;
+        `;
+        
+        try {
+            const result = await db.run(updateQuery, [notificationId]);
+            
+            if (result.changes > 0) {
+                res.json({ status: true, message: "Notification marked as viewed." });
+            } else {
+                res.json({ status: false, message: "Notification not found or already viewed." });
+            }
+        } catch (error) {
+            console.error('Error updating Notification Data', error);
+            res.status(500).json({ status: false, message: "Internal server error." });
+        }
+    });
+    
     return router;
 };
