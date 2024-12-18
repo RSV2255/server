@@ -43,11 +43,22 @@ module.exports = (db) => {
         const {phoneNumber} = req.body;
         const selectquery = 
         `
-        SELECT DISTINCT *
-    FROM "userDetails"
-    WHERE mobileNumber = ?
+SELECT 
+    id,
+    fullName,
+    email,
+    mobileNumber,
+    userRole,
+    userLogo
+FROM (
+    SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM designerDetails WHERE mobileNumber = ?
+    UNION
+    SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM userDetails WHERE mobileNumber = ?
+) AS subquery
+LIMIT 1;
         `;
-        const user = await db.get(selectquery, [phoneNumber]);
+        
+        const user = await db.get(selectquery, [phoneNumber,phoneNumber]);
         if (!user) {
             res.status(400).json({
                 Status: "User does not exist",
@@ -290,7 +301,7 @@ module.exports = (db) => {
         }
     })
     router.post('/user-catalog', async (req,res) => {
-        const { catalogIds, userId } = req.body; // Accept an array of catalog IDs
+        const { catalogIds, userId } = req.body; 
         const fetchUserCatalog = `
         INSERT INTO user_catalogs (catalogId, userId)
         VALUES (?, ?)
@@ -311,7 +322,7 @@ module.exports = (db) => {
             res.status(500).json({ status: false, error: 'Error processing user catalogs', details: error.message });
         }
     })
-
+    
     router.delete('/user-catalog', async (req, res) => {
         const { catalogIds, userId } = req.body;
         if (!Array.isArray(catalogIds) || catalogIds.length === 0 || !userId) {
@@ -355,10 +366,8 @@ module.exports = (db) => {
             SET isViewed = 'True' 
             WHERE id = ?;
         `;
-        
         try {
             const result = await db.run(updateQuery, [notificationId]);
-            
             if (result.changes > 0) {
                 res.json({ status: true, message: "Notification marked as viewed." });
             } else {
@@ -369,6 +378,5 @@ module.exports = (db) => {
             res.status(500).json({ status: false, message: "Internal server error." });
         }
     });
-    
     return router;
 };
