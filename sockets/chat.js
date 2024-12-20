@@ -42,45 +42,45 @@ module.exports = (io, db) => {
         
     });
     // fetching the chatlist from the database
-    socket.on('fetchChatlist', async (userId, callback) => {
-        try {
-            const chatlistQuery = `
-                WITH LatestMessages AS (
-                    SELECT
-                        CASE 
-                            WHEN userId = ? THEN otherUserId
-                            ELSE userId
-                        END AS partnerUserId,
-                        MAX(createAt) AS latestCreateAt
-                    FROM chat
-                    WHERE (userId = ? OR otherUserId = ?) AND userId != otherUserId
-                    GROUP BY partnerUserId
-                )
-                SELECT c.*
-                FROM chat c
-                JOIN LatestMessages lm
-                    ON ((c.userId = ? AND c.otherUserId = lm.partnerUserId)
-                        OR (c.userId = lm.partnerUserId AND c.otherUserId = ?))
-                    AND c.createAt = lm.latestCreateAt
-                ORDER BY c.createAt DESC;
-            `;
+    // socket.on('fetchChatlist', async (userId, callback) => {
+    //     try {
+    //         const chatlistQuery = `
+    //             WITH LatestMessages AS (
+    //                 SELECT
+    //                     CASE 
+    //                         WHEN userId = ? THEN otherUserId
+    //                         ELSE userId
+    //                     END AS partnerUserId,
+    //                     MAX(createAt) AS latestCreateAt
+    //                 FROM chat
+    //                 WHERE (userId = ? OR otherUserId = ?) AND userId != otherUserId
+    //                 GROUP BY partnerUserId
+    //             )
+    //             SELECT c.*
+    //             FROM chat c
+    //             JOIN LatestMessages lm
+    //                 ON ((c.userId = ? AND c.otherUserId = lm.partnerUserId)
+    //                     OR (c.userId = lm.partnerUserId AND c.otherUserId = ?))
+    //                 AND c.createAt = lm.latestCreateAt
+    //             ORDER BY c.createAt DESC;
+    //         `;
             
-            const chatlist = await db.all(chatlistQuery, [userId, userId, userId, userId, userId]);
+    //         const chatlist = await db.all(chatlistQuery, [userId, userId, userId, userId, userId]);
             
-            console.log('Fetched chatlist:', chatlist); // Log the fetched chatlist
+    //         console.log('Fetched chatlist:', chatlist); // Log the fetched chatlist
             
-            if (!chatlist || chatlist.length === 0) {
-                console.log('No chatlist found for userId:', userId);
-                callback({ success: false, message: 'No chatlist found' });
-            } else {
-                console.log(`Chatlist fetched successfully for userId: ${userId}. Count: ${chatlist.length}`);
-                callback({ success: true, chatlist });
-            }
-        } catch (error) {
-        console.error('Error fetching chatlist:', error);
-        callback({ success: false, message: 'Error fetching chatlist', error });
-        }
-    });
+    //         if (!chatlist || chatlist.length === 0) {
+    //             console.log('No chatlist found for userId:', userId);
+    //             callback({ success: false, message: 'No chatlist found' });
+    //         } else {
+    //             console.log(`Chatlist fetched successfully for userId: ${userId}. Count: ${chatlist.length}`);
+    //             callback({ success: true, chatlist });
+    //         }
+    //     } catch (error) {
+    //     console.error('Error fetching chatlist:', error);
+    //     callback({ success: false, message: 'Error fetching chatlist', error });
+    //     }
+    // });
    
     // fetching the messages from the database
    

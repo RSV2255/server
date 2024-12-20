@@ -21,14 +21,13 @@ module.exports = (db) => {
         try {
             const selectQuery = `SELECT * FROM userDetails WHERE mobileNumber = ? OR email = ?`;
             const existingUser = await db.get(selectQuery, [mobileNumber, email]);
-    
             if (existingUser) {
                 res.status(409).json ({status: true ,  message : 'User already exists with the same mobile number or email' });
                 return;
             }
             else {
             const insertQuery = `
-            INSERT INTO userDetails (socketId, fullName, email, mobileNumber, userRole) 
+            INSERT INTO userDetails (socketId, fullName, email, mobileNumber, userRole)
             VALUES (?, ?, ?, ?, ?)
             `;
             await db.run(insertQuery, [socketId, fullName, email, mobileNumber, 1]);
@@ -43,19 +42,19 @@ module.exports = (db) => {
         const {phoneNumber} = req.body;
         const selectquery = 
         `
-SELECT 
-    id,
-    fullName,
-    email,
-    mobileNumber,
-    userRole,
-    userLogo
-FROM (
-    SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM designerDetails WHERE mobileNumber = ?
-    UNION
-    SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM userDetails WHERE mobileNumber = ?
-) AS subquery
-LIMIT 1;
+        SELECT 
+            id,
+            fullName,
+            email,
+            mobileNumber,
+            userRole,
+            userLogo
+        FROM (
+            SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM designerDetails WHERE mobileNumber = ?
+            UNION 
+            SELECT id, fullName, email, mobileNumber, userRole, userLogo FROM userDetails WHERE mobileNumber = ?
+        ) AS subquery
+        LIMIT 1;
         `;
         
         const user = await db.get(selectquery, [phoneNumber,phoneNumber]);
@@ -79,7 +78,6 @@ LIMIT 1;
            })
         }
     })
-
     router.get('/userDetails/:userId', async (req,res) => {
         const userId = req.params.userId;
         try {
@@ -98,6 +96,7 @@ LIMIT 1;
             res.status(500).json({ status: false, message: "Internal server error" });
         }
     })
+
     router.put('/updateUserDetails/:userId', async (req,res) => {
         const userId = req.params.userId;
         try {
@@ -112,6 +111,7 @@ LIMIT 1;
             res.status(500).json({ status: false, message: 'Internal server error' });
         }
     })
+
     router.post('/upload-image', (req, res) => {
         console.log(req.body);
         ensureImageDirectoryExists();
@@ -169,9 +169,9 @@ LIMIT 1;
             res.status(500).json({ status: false, message: "Internal server error" });
         }
     })
+
     router.post('/propertyRegister', async (req, res) => {
         const { userId, property, minBudget, maxBudget, propertySize, propertySizeUnits, startDate, endDate, projectType, selectedProperty, occupancy, area, city, community, buildersProject, unitType } = req.body;
-
         const insertStatement = `
         INSERT INTO property_details (
             userId, propertyType, projectType, property, occupancy, area, city, community, buildersProject, unitType, minBudget, maxBudget, propertySize, propertySizeUnits, startDate, endDate
@@ -222,6 +222,7 @@ LIMIT 1;
             res.status(500).json({ status: false, error: 'Error fetching project list', details: error.message });
         }
     })
+
     router.get('/fetchTransactions/:userId', async (req,res) => {
         const userId = req.params.userId;
         const fetchTransactions = `
@@ -247,6 +248,7 @@ LIMIT 1;
             res.status(500).json({ status: false, error: 'Error fetching transactions', details: error.message });
         }
     })
+
     router.get('/fetchOngoingProjectPayments/:userId', async (req,res) => {
         const userId = req.params.userId;
         const fetchOngoingProjectPayments = `
@@ -262,8 +264,8 @@ LIMIT 1;
         pay.amount AS payment_amount,
         pay.createdAt AS createdAt,
         SUM(pay.amount) OVER (PARTITION BY p.projectId ORDER BY pay.createdAt) AS cumulative_payment,
-        (SUM(pay.amount) OVER (PARTITION BY p.projectId ORDER BY pay.createdAt) * 100.0 / p.budget) AS cumulative_percentage  
-    FROM 
+        (SUM(pay.amount) OVER (PARTITION BY p.projectId ORDER BY pay.createdAt) * 100.0 / p.budget) AS cumulative_percentage
+    FROM
         projects p
     JOIN 
         payments pay ON p.projectId = pay.project_id
@@ -271,7 +273,7 @@ LIMIT 1;
         p.userId = ?
         AND p.status = 'Ongoing'
     )
-    SELECT 
+    SELECT
         payment_id,
         budget,
         createdAt,
@@ -288,6 +290,7 @@ LIMIT 1;
             res.status(500).json({ status: false, error: 'Error fetching transactions', details: error.message });
         }
     })
+
     router.get('/catalogs', async (req, res) => {
         const fetchCatalogs = `
         SELECT * FROM catalogs;
@@ -300,6 +303,7 @@ LIMIT 1;
             res.status(500).json({ status: false, error: 'Error fetching catalogs', details});
         }
     })
+
     router.post('/user-catalog', async (req,res) => {
         const { catalogIds, userId } = req.body; 
         const fetchUserCatalog = `
@@ -342,6 +346,7 @@ LIMIT 1;
             res.status(500).json({ status: false, error: 'Error deleting unmatched user catalogs', details: error.message });
         }
     });
+
     router.get('/notification/:userId/:userRole', async(req, res) => {
         const userId = req.params.userId;
         const userRole = req.params.userRole;
@@ -359,6 +364,7 @@ LIMIT 1;
             console.error('Error fetching Notifications Data', error);
         }
     })
+
     router.put('/notification/:notificationId', async (req, res) => {
         const notificationId = req.params.notificationId;
         const updateQuery = `

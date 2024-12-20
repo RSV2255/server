@@ -45,7 +45,7 @@ module.exports = (io, db) => {
               ORDER BY dp.createdAt DESC
             `;
             const rows = await db.all(query, [designerId]);
-                if (rows){  
+                if (rows && rows.length > 0){  
                     callback({ success: true, posts: rows });
                 } else {
                     console.log('Designer posts not found');
