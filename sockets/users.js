@@ -1,4 +1,4 @@
-module.exports = (io, db) => {
+export default (io, db) => {
     io.on('connect', (socket) => {
         console.log(`Client connected with ${socket.id}`);
         //updating the socketId for user in the database

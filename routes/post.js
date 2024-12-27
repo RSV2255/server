@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-module.exports = (db) => {
+export default (db) => {
     router.get('/fetchComments/:postId', async (req,res) => {
         const postId = req.params.postId;
         const getComments = `

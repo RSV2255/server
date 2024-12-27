@@ -1,6 +1,6 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
 const router = express.Router();
 
 // Ensure the uploads directory exists
@@ -11,7 +11,7 @@ const ensureImageDirectoryExists = () => {
     }
 };
 
-module.exports = (db) => {
+export default (db) => {
     router.post('/register', async (req, res) => {
         const { socketId, fullName, email, mobileNumber } = req.body;
     
@@ -35,6 +35,21 @@ module.exports = (db) => {
             }
         } catch (error) {
             console.error('Error registering user:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+    router.get('/fetchUser/:mobileNumber', async (req,res) => {
+        const mobileNumber = req.params.mobileNumber;
+        const selectQuery = `SELECT * FROM userDetails WHERE mobileNumber = ?`;
+        try {
+            const user = await db.get(selectQuery, [mobileNumber]);
+            if (user) {
+                res.json(user);
+            } else {
+                res.status(404).json({ message: 'User not found' });
+            }
+        } catch (error) {
+            console.error('Error fetching user:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     });

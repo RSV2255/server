@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-module.exports = (db) => {
+export default (db) => {
     // Fetch all designers
     router.get('/fetchDesignerdetails/:designerId', async (req, res) => {
         const designerId = req.params.designerId;

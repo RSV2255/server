@@ -1,5 +1,5 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
+import sqlite3 from 'sqlite3'; // Import sqlite3
+import { open } from 'sqlite'; // Import open function from sqlite
 
 let db = null;
 
@@ -21,7 +21,5 @@ async function initializeDatabase() {
   }
 }
 
-module.exports = {
-  initializeDatabase,
-  getDatabase: () => db
-};
+export default initializeDatabase;
+

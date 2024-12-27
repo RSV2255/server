@@ -1,4 +1,4 @@
-module.exports = (io, db) => {
+export default (io, db) => {
     socket.on('fetchLikedFeed', async (userId, callback) => {
         console.log('Fetching liked feed for userId:', userId);
         try {

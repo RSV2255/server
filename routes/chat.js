@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const path = require('path');
-const fs = require('fs');
+import express from 'express'; // Import Express
+import path from 'path'; // Import Path module
+import fs from 'fs'; // Import File System module
 
+const router = express.Router();
 
 const ensureImageDirectoryExists = () => {
     const uploadDir = path.join(__dirname, '..', 'images');
@@ -24,7 +24,7 @@ const ensurePdfDirectoryExists = () => {
         fs.mkdirSync(uploadsDir);
     }
 };
-module.exports = (db) => {
+export default (db) => {
     router.post('/upload-image', (req, res) => {
         console.log(req.body);
         ensureImageDirectoryExists();

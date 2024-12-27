@@ -1,4 +1,4 @@
-module.exports = (io, db) => {
+export default (io, db) => {
     io.on('connect', (socket) => {
         console.log('Designer socket connected:', socket.id);
         socket.on('updateSocket', async (socketId, userId) => {

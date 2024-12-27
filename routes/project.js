@@ -1,9 +1,7 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+import express from 'express'; // Import Express
 const router = express.Router();
 
-module.exports = (db) => {
+export default (db) => {
         router.get('/fetchServices/:projectId', async (req, res) => {
         const projectId = req.params.projectId;
         const query = `
