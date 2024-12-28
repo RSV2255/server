@@ -97,6 +97,21 @@ export default (db) => {
             res.status(500).json({ success: false, message: 'Internal server error' });
         }
     })
-    
+    router.get('/fetchAllProducts', async (req,res) => {
+        const fetchProductsQuery = `
+        SELECT * from vendorProducts;
+        `
+        try {
+            const products = await db.all(fetchProductsQuery);
+            if (products.length > 0) {
+                res.json({ success: true, products });
+            } else {
+                res.status(404).json({ success: false, message: 'No products found' });
+            }
+        } catch(error) {
+            console.error('Error fetching products:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    })
     return router;
 };
