@@ -120,7 +120,7 @@ export default (io, db) => {
 						THEN (SELECT userLogo FROM userDetails WHERE id = c.userId)
 						WHEN c.userRole = 2
 						THEN (SELECT userLogo FROM designerDetails WHERE id = c.userId)
-					END AS userlogo,
+					END AS userLogo,
 					CASE 
 						WHEN c.otherUserRole = 1 
 						THEN (SELECT userLogo FROM userDetails WHERE id = c.otherUserId)
