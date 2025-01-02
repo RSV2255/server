@@ -14,7 +14,7 @@ const ensureImageDirectoryExists = () => {
 export default (db) => {
     router.post('/register', async (req, res) => {
         const { socketId, fullName, email, mobileNumber } = req.body;
-    
+        
         if (!fullName || !email || !mobileNumber) {
             return res.status(400).json({ error: 'Full name, email, and mobile number are required' });
         }
@@ -399,5 +399,20 @@ export default (db) => {
             res.status(500).json({ status: false, message: "Internal server error." });
         }
     });
+
+    router.get('/fetchProjectRequests/:userId', async (req, res) => {
+        const userId = req.params.userId;
+        const fetchQuery = `
+        SELECT * FROM project_requests WHERE userId = ?;
+        `;
+        try {
+            const rows = await db.all(fetchQuery, [userId]);
+            res.json(rows);
+        } catch (error) {
+            console.error('Error fetching project requests:', error);
+            res.status(500).json({ status: false, error: 'Error fetching project requests', details: error.message });
+        }
+    });
+
     return router;
 };
