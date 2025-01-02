@@ -403,7 +403,7 @@ export default (db) => {
     router.get('/fetchProjectRequests/:userId', async (req, res) => {
         const userId = req.params.userId;
         const fetchQuery = `
-        SELECT * FROM project_requests WHERE userId = ?;
+        SELECT * FROM projectRequest WHERE userId = ? ORDER BY createdAt DESC;
         `;
         try {
             const rows = await db.all(fetchQuery, [userId]);
