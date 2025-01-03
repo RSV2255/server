@@ -403,10 +403,14 @@ export default (db) => {
     router.get('/fetchProjectRequests/:userId', async (req, res) => {
         const userId = req.params.userId;
         const fetchQuery = `
-        SELECT * FROM projectRequest WHERE userId = ? ORDER BY createdAt DESC;
+        SELECT (SELECT COUNT(*) FROM projectRequest WHERE status = 'Accepted') as accepted,
+(SELECT COUNT(*) FROM projectRequest WHERE status = 'Rejected') as rejected,
+(SELECT COUNT(*) FROM projectRequest WHERE status = 'Received') as received
+FROM projectRequest 
+WHERE userId = ? LIMIT 1;
         `;
         try {
-            const rows = await db.all(fetchQuery, [userId]);
+            const rows = await db.get(fetchQuery, [userId]);
             res.json(rows);
         } catch (error) {
             console.error('Error fetching project requests:', error);
