@@ -57,8 +57,11 @@ export default (io, db) => {
             }
         });
         
+        
+
         socket.on('disconnect', () => {
             console.log('Designer socket disconnected:', socket.id);
         });
     });
+
 };

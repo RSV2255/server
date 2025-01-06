@@ -470,24 +470,23 @@ export default (io, db) => {
 
         socket.on('toggleFollowDesigner', async({ userId, designerId }, callback) => {
             try {
-                const checkQuery = `SELECT * FROM follows WHERE followingId = ? AND followerId = ?`;
+                const checkQuery = `SELECT * FROM follows WHERE followingId = ? AND followerId = ? AND followerUserRole = 2 AND followingUserRole = 1`;
                 const existingFollow = await db.get(checkQuery, [userId, designerId]);
 
                 if (existingFollow) {
                     // Unfollow
-                    const deleteQuery = `DELETE FROM follows WHERE followingId = ? AND followerId = ?`;
+                    const deleteQuery = `DELETE FROM follows WHERE followingId = ? AND followerId = ? AND followerUserRole = 2 AND followingUserRole = 1`;
                     await db.run(deleteQuery, [userId, designerId]);
                     callback({ success: true, message: 'Unfollowed successfully', isFollowing: false });
 
-                    // Notify the designer that they lost a follower
                     const designerSocket = await findSocketIdByUserId(designerId);
                     if (designerSocket) {
                         io.to(designerSocket).emit('lostFollower', { followerId: userId });
                     }
                 } else {
                     // Follow
-                    const insertQuery = `INSERT INTO follows (followingId, followerId, createdAt) VALUES (?, ?, ?)`;
-                    await db.run(insertQuery, [userId, designerId, Date.now()]);
+                    const insertQuery = `INSERT INTO follows (followingId, followerId, createdAt, followerUserRole, followingUserRole) VALUES (?, ?, ?, ?, ?)`;
+                    await db.run(insertQuery, [userId, designerId, Date.now(), 2, 1]);
                     callback({ success: true, message: 'Followed successfully', isFollowing: true });
 
                     // Notify the designer that they have a new follower
@@ -504,7 +503,7 @@ export default (io, db) => {
 
         socket.on('fetchFollowStatus', async({ userId, designerId }, callback) => {
             try {
-                const checkQuery = `SELECT * FROM follows WHERE followingId = ? AND followerId = ?`;
+                const checkQuery = `SELECT * FROM follows WHERE followingId = ? AND followerId = ? AND followerUserRole = 2 AND followingUserRole = 1`;
                 const existingFollow = await db.get(checkQuery, [userId, designerId]);
 
                 callback({ success: true, isFollowing: !!existingFollow });
