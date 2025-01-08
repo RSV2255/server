@@ -298,7 +298,7 @@ export default (io, db) => {
                     await db.run(unsavedPostDeleteStatement, [postId, userId]);
                     await db.run('COMMIT');
                     console.log('Post Unsaved');
-                    io.emit('saveUpdate', { postId, userId, saved: false }); // Include saved status
+                    io.emit('saveUpdate', { postId, userId, saved: false });
                     callback({ success: true, saved: false });
                 } catch (error) {
                     await db.run('ROLLBACK');

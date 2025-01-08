@@ -45,7 +45,7 @@ export default (io, db) => {
               ORDER BY dp.createdAt DESC
             `;
             const rows = await db.all(query, [designerId]);
-                if (rows && rows.length > 0){  
+                if (rows && rows.length > 0) {
                     callback({ success: true, posts: rows });
                 } else {
                     console.log('Designer posts not found');
@@ -56,9 +56,8 @@ export default (io, db) => {
                 callback({ success: false, error: error.message });
             }
         });
-        
-        
 
+        
         socket.on('disconnect', () => {
             console.log('Designer socket disconnected:', socket.id);
         });
