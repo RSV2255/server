@@ -100,8 +100,7 @@ export default (db) => {
                 WHERE projectId IN (
                     SELECT projectId
                     FROM projects
-                    WHERE userId = ?
-                        AND status = 'Ongoing'
+                    WHERE userId = ? AND status = 'Ongoing'
                 )
                 AND serviceId = ps.serviceId
                 ORDER BY createdAt
@@ -117,5 +116,30 @@ export default (db) => {
                 res.status(500).json({ success: false, message: 'Internal server error' });
             }
         })
+        router.post('/reviews', async (req, res) => {
+            try {
+                const { user_name, user_image, rating, comment } = req.body;
+        
+                await db.run(`
+                    INSERT INTO reviews (user_name, user_image, rating, comment, reviewed_at)
+                    VALUES (?, ?, ?, ?,?);
+                `, [user_name, user_image, rating, comment, Date.now()]);
+        
+                res.send({ message: 'Review added successfully' });
+            } catch (err) {
+                console.error(err);
+                res.status(500).send({ message: 'Error adding review' });
+            }
+        });
+        
+        router.get('/reviews', (req, res) => {
+            db.all('SELECT * FROM reviews', (err, rows) => {
+                if (err) {
+                    res.status(500).send({ message: 'Error fetching reviews' });
+                } else {
+                    res.send(rows);
+                }
+            });
+        });
         return router;
 }
